@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 
 class FolderListCreateView(generics.ListCreateAPIView):
+    queryset = Folder.objects.all()
     serializer_class = FolderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -22,5 +23,5 @@ class NoteListCreateView(generics.ListCreateAPIView):
         return Note.objects.filter(folder__user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save
+        serializer.save()
 

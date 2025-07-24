@@ -4,7 +4,7 @@ from .models import Folder, Note
 class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Folder
-        fields = ['id', 'user', 'name', 'created_at']
+        fields = ['id', 'name', 'created_at']
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
