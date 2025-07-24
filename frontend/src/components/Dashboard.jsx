@@ -1,10 +1,13 @@
+import { use } from 'react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [folders, setFolders] = useState([]);
     const [newFolderName, setNewFolderName] = useState('');
     const [error, setError] = useState('');
 
+    const navigate = useNavigate();
     const API_URL = import.meta.env.VITE_API_URL;
     const accessToken = localStorage.getItem('access');
 
@@ -13,34 +16,27 @@ const Dashboard = () => {
             try {
                 const response = await fetch(`${API_URL}/api/folders/`, {
                     headers: {
-                        Authorization: `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${accessToken}`
                     }
                 })
                 const data = await response.json();
                 if (response.ok) {
                     setFolders(data);
-                }
-                else {
+                } else {
                     setError(data.detail || "Failed to fetch folders.");
                 }
             } catch (e) {
-                setError('Failed to fetch folders.');
+                setError("An error occurred while fetching folders.");
             }
-        }        
+        }
         fetchFolders();
     }, [API_URL, accessToken]);
-
-    const handleFolderChange = (e) => {
-        setNewFolderName(e.target.value);
-    }
 
     const handleCreateFolder = async (e) => {
         e.preventDefault();
         setError('');
 
         try {
-            console.log(newFolderName);
-            
             const response = await fetch(`${API_URL}/api/folders/`, {
                 method: 'POST',
                 headers: {
@@ -48,50 +44,46 @@ const Dashboard = () => {
                     Authorization: `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({ name: newFolderName }),
-            });
-
+            })
             if (response.ok) {
                 const newFolder = await response.json();
                 setFolders((prev) => [...prev, newFolder]);
                 setNewFolderName('');
             } else {
                 const data = await response.json();
-                console.log("Create folder error response:", data);
-                setError(JSON.stringify(data));  // show exact error
-                // setError(data.name?.[0] || "Failed to create folder.");
+                setError(data.detail || "Failed to create folder.");
             }
         } catch (e) {
-            setError('Failed to create folder.');
+            setError("An error occurred while creating the folder.");
         }
+    }
+
+    const openFolder = (id) => {
+        navigate(`/folders/${id}`);
     }
 
     return (
         <div>
-            <h2>Your folders</h2>
+            <h2>Your Folders</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <h3>New Folder</h3>
             <form onSubmit={handleCreateFolder}>
-                <input
-                    type="text"
+                <input 
+                    type="text" 
                     value={newFolderName}
-                    onChange={handleFolderChange}
-                    required
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    placeholder="New folder name"
                 />
-                <button type="submit">Create</button>
+                <button type="submit">Create Folder</button>
             </form>
-            {folders.length === 0 ? (
-                <p>No folders found.</p>
-            ) : (
-                <ul>
-                    {folders.map(folder => (
-                        <li key={folder.id}>
-                            <h3>{folder.name}</h3>
-                        </li>
-                    ))}
-                </ul>
-            )}
+            <ul>
+                {folders.map((folder) => (
+                    <li key={folder.id} onClick={() => openFolder(folder.id)}>
+                        {folder.name}
+                    </li>
+                ))}
+            </ul>
         </div>
     )
-}
+};
 
 export default Dashboard;

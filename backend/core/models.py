@@ -12,7 +12,7 @@ class Folder(models.Model):
 class Note(models.Model):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='notes')
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
